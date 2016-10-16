@@ -151,7 +151,8 @@ app.post('/addusershot', function (req, res) {
     );
 });
 
-/** 设置运动员步数*/
+/****************************查询接口 *****************************/
+/** 查询最近场次的比赛*/
 app.get('/recentgame', function (req, res) {
     res.contentType('json');//返回的数据类型
     console.log("recentgame called");
@@ -164,6 +165,10 @@ app.get('/recentgame', function (req, res) {
             res.send(JSON.stringify({error:"error"}));
             return;
         };
+        if(result.length == 0){
+            res.send(JSON.stringify({error:"no found data"}));
+            return;
+        }
         console.log(result[0]);
         var gameInfo = {
             error:null,
@@ -171,5 +176,38 @@ app.get('/recentgame', function (req, res) {
             createTime:result[0].createTime
         }
         res.send(JSON.stringify(gameInfo));
+    });
+});
+
+/** 查询某用户在某个gameid*/
+app.get('/userSteps', function (req, res) {
+    res.contentType('json');//返回的数据类型
+    console.log("userSteps called");
+    if(req.query.gameid == undefined || req.query.userid == undefined){
+        res.send(JSON.stringify({error:"请传递完整参数"}));
+        return;
+    }
+    var gameid = req.query.gameid;
+    var userid = req.query.userid;
+    var sql = 'SELECT * FROM gameUserSteps WHERE gameid='+gameid+' AND userid="'+userid+'"';
+    console.log(sql);
+    //select
+    conn.query(sql, function (err, result) {
+        if (err){
+            console.log(err);
+            res.send(JSON.stringify({error:"error"}));
+            return;
+        };
+        if(result.length == 0){
+            res.send(JSON.stringify({error:"no found data"}));
+            return;
+        }
+        var userStepsInfo = {
+            error:null,
+            gameid:result[0].gameid,
+            userid:result[0].userid,
+            steps:result[0].steps
+        }
+        res.send(JSON.stringify(userStepsInfo));
     });
 });
